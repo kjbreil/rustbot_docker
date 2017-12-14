@@ -1,0 +1,47 @@
+version: '2'
+
+services:
+  rustbotdb:
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=rustbot
+      - POSTGRES_PASSWORD=samplepass
+      - POSTGRES_DB=rustbot
+    volumes:
+      - rustbotdb:/var/lib/postgresql/data
+      - ./rustBotPG.sql:/docker-entrypoint-initdb.d/rustBotPG.sql
+  rustserver:
+    image: didstopia/rust-server
+    restart: unless-stopped
+    ports:
+      - "28015:28015/tcp"
+      - "28015:28015/udp"
+      - "28016:28016/tcp"
+    volumes:
+      - rustserver:/steamcmd/rust
+    environment:
+      - RUST_SERVER_STARTUP_ARGUMENTS=-batchmode -load -logfile /dev/stdout +server.secure 1
+      - RUST_SERVER_IDENTITY=rustBot_test_server
+      - RUST_SERVER_SEED=12345
+      - RUST_SERVER_WORLDSIZE=1000
+      - RUST_SERVER_NAME=RustBot Test Server
+      - RUST_SERVER_DESCRIPTION=just walk away
+      - RUST_RCON_PASSWORD=samplepass
+  rustbotjs:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes:
+      - ./config.js:/app/config.js
+      - ./logs:/app/logs
+    environment:
+      - PGPASSWORD=samplepass
+
+      # psql -h db -U rustbot -d rustbot -f rustBot.sql
+volumes:
+  rustbotdb:
+  rustserver:
