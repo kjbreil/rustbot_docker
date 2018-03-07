@@ -12,10 +12,6 @@ RUN git clone https://github.com/kjbreil/rustBot.git /app
 
 RUN npm install
 
-RUN npm install -g nodemon
-
-# COPY config.js /app
-
 EXPOSE 8080
 
-CMD ["nodemon", "/app/app.js"]
+CMD ["node", "/app/app.js"]
